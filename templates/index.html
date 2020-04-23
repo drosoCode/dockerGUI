@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="static/css/fontawesome.min.css">
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #313131;
+            max-width: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        .card:hover {
+            box-shadow: 5px 5px 5px 5px #222;
+        }
+        .cardsContainer {
+            width: 90%;
+        }
+        @media screen and (max-width: 500px) {
+            .cardsContainer {
+                width: 98%;
+            }
+        }
+        .cardsContainer .card{
+            margin-top: 1rem;
+        }
+    </style>
+    <title>Docker Containers</title>
+    <link rel="icon" type="image/png" href="static/icons/docker.png">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100%;"> 
+        <a class="navbar-brand" href="#">
+            <img src="static/icons/docker.png" width="40" height="30" class="d-inline-block align-top" alt="">
+            Docker Containers
+        </a>
+    </nav>
+
+    <div class="cardsContainer mx-auto">
+        <div class="row">
+            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+                <div class="card text-center bg-dark text-white">
+                    <div class="card-header bg-primary">
+                        CPU
+                    </div>
+                    <div class="card-body">
+                        <img src="static/icons/cpu.png" width="100px" height="100px"/>
+                    </div>
+                    <div class="card-footer bg-secondary" id="stat_cpu"></div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+                <div class="card text-center bg-dark text-white">
+                    <div class="card-header bg-primary">
+                        RAM
+                    </div>
+                    <div class="card-body">
+                        <img src="static/icons/ram.png" width="100px" height="100px"/>
+                    </div>
+                    <div class="card-footer bg-secondary" id="stat_ram"></div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+                <div class="card text-center bg-dark text-white">
+                    <div class="card-header bg-primary">
+                        GPU
+                    </div>
+                    <div class="card-body">
+                        <img src="static/icons/gpu.png" width="100px" height="100px"/>
+                    </div>
+                    <div class="card-footer bg-secondary" id="stat_gpu"></div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+                <div class="card text-center bg-dark text-white">
+                    <div class="card-header bg-primary">
+                        NETWORK
+                    </div>
+                    <div class="card-body">
+                        <img src="static/icons/network.png" width="100px" height="100px"/>
+                    </div>
+                    <div class="card-footer bg-secondary" id="stat_net"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="containers"></div>
+    </div>
+
+
+      <div class="modal fade" id="logsModal" tabindex="-1" role="dialog" >
+        <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">LOGS</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body" id="logs">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    
+    <script src="static/js/jquery-3.2.1.slim.min.js"></script>
+    <script src="static/js/bootstrap.min.js"></script>
+    <script src="static/js/index.js"></script>
+  </body>
+</html>
