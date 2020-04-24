@@ -86,8 +86,8 @@ def getStatistics():
 		"gpu": {
 			"name": gpu.name,
 			"temperature": gpu.temperature,
-			"load": gpu.load*100,
-			"memory": gpu.memoryUtil*100
+			"load": round(gpu.load*100, 1),
+			"memory": round(gpu.memoryUtil*100, 1)
 		},
 		"cpu": psutil.cpu_percent(interval=1, percpu=True),
 		"ram": psutil.virtual_memory()[2],
