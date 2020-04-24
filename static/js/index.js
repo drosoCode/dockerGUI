@@ -28,10 +28,7 @@ function makeContainerCards()
         html += '<button type="button" class="btn btn-secondary" onclick="switchContainer(\''+ids+'\',\''+c["imageName"]+'\',\''+c["id"]+'\')"><i class="fas fa-power-off"></i></button>&nbsp;&nbsp;&nbsp;';
         html += '<img src="static/icons/'+c["icon"]+'" width="100px" height="100px"/>';
         html += '&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-secondary" onclick="getLogs(\''+c["id"]+'\')"><i class="fas fa-server"></i></button>';
-        p = c["ports"];
-        if(p == "")
-            p = "None"
-        html += '</div><div class="card-footer bg-secondary">'+p+'&nbsp;##&nbsp;'+c["startDate"]+'</div></div></div>';
+        html += '</div><div class="card-footer bg-secondary">'+c["ports"]+'&nbsp;##&nbsp;'+c["startDate"]+'</div></div></div>';
         ids++;
     });
     document.querySelector("#containers").innerHTML = html;

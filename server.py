@@ -23,11 +23,18 @@ def home():
 def getContainers():
 	running = {}
 	for c in client.containers.list():
+		ports = ""
+		for p in c.attrs["HostConfig"]["PortBindings"].keys():
+			ports += c.attrs["HostConfig"]["PortBindings"][p][0]["HostPort"]+" | "
+		if ports == "":
+			ports = "None"
+		else:
+			ports = ports[0:len(ports)-3]
 		running[c.attrs["Config"]["Image"]] = {
 			"id": c.attrs["Image"],
 			"status": c.attrs["State"]["Running"],
-			"startDate": c.attrs["State"]["StartedAt"],
-			"ports": ' | '.join(c.attrs["HostConfig"]["PortBindings"].keys())
+			"startDate": c.attrs["State"]["StartedAt"][0:c.attrs["State"]["StartedAt"].find(".")],
+			"ports": ports
 		}
 	containers = data["containers"]
 	for container in containers:
@@ -35,7 +42,7 @@ def getContainers():
 			dat = running[container["imageName"]]
 			container["id"] = dat["id"][7:]
 			container["status"] = dat["status"]
-			container["startDate"] = dat["startDate"][0:dat["startDate"].find(".")]
+			container["startDate"] = dat["startDate"]
 			container["ports"] = dat["ports"]
 		else:
 			container["id"] = -1
