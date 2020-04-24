@@ -78,5 +78,12 @@ function getLogs(id)
     }
 }
 
-makeContainerCards();
-updateStats();
+
+document.addEventListener('DOMContentLoaded', () => {
+    makeContainerCards();
+    updateStats();
+});
+
+setInterval(function(){ 
+    updateStats();
+}, 10000);
