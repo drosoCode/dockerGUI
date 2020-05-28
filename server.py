@@ -1,6 +1,7 @@
 import os
 import flask
 from flask import request, jsonify, abort, render_template
+from datetime import datetime
 import docker
 from GPUtil import getGPUs
 import psutil
@@ -23,65 +24,83 @@ def home():
 def getContainers():
 	running = {}
 	for c in client.containers.list():
-		ports = ""
+		ports = []
 		for p in c.attrs["HostConfig"]["PortBindings"].keys():
-			ports += c.attrs["HostConfig"]["PortBindings"][p][0]["HostPort"]+" | "
+			ports.append(c.attrs["HostConfig"]["PortBindings"][p][0]["HostPort"])
 		if ports == "":
-			ports = "None"
-		else:
-			ports = ports[0:len(ports)-3]
-		running[c.attrs["Config"]["Image"]] = {
-			"id": c.attrs["Image"],
+			ports = None
+		running[c.attrs["Name"][1:]] = {
 			"status": c.attrs["State"]["Running"],
 			"startDate": c.attrs["State"]["StartedAt"][0:c.attrs["State"]["StartedAt"].find(".")],
 			"ports": ports
 		}
-	containers = data["containers"]
-	for container in containers:
-		if container["imageName"] in running:
-			dat = running[container["imageName"]]
-			container["id"] = dat["id"][7:]
-			container["status"] = dat["status"]
-			container["startDate"] = dat["startDate"]
-			container["ports"] = dat["ports"]
+		
+	ret = []
+	for package in data["containers"]:
+		package["containers_running"] = 0
+		package["startDate"] = -1
+		package["ports"] = 0
+		package["containers_total"] = len(package["containers"])
+		package["containers_status"] = []
+		package["containers_date"] = []
+		package["containers_ports"] = []
+
+		for container in package["containers"]:
+			if container in running:
+				package["containers_running"] += 1
+				dat = running[container]
+				if dat["ports"] is not None:
+					package["ports"] += len(dat["ports"])
+					package["containers_ports"].append(dat["ports"])
+				else:
+					package["containers_ports"].append('None')
+				dt = datetime.strptime(dat["startDate"], '%Y-%m-%dT%H:%M:%S')
+				if package["startDate"] == -1 or package["startDate"] < dt:
+					package["startDate"] = dt
+				package["containers_status"].append(True)
+				package["containers_date"].append(dat["startDate"])
+			else:
+				package["containers_status"].append(False)
+				package["containers_date"].append('Undefined')
+
+		if package["startDate"] == -1:
+			package["startDate"] = "Undefined"
 		else:
-			container["id"] = -1
-			container["status"] = False
-			container["startDate"] = "Undefined"
-			container["ports"] = "None"
-	return jsonify(containers)
+			package["startDate"] = package["startDate"].strftime("%Y/%m/%d %H:%M:%S")
+		ret.append(package)
+
+	return jsonify(ret)
 
 @app.route('/api/getLogs', methods=['GET'])
 def getLogs():
+	containers = data["containers"][int(request.args["id"])]["containers"]
 	for c in client.containers.list():
-		if c.attrs["Image"][7:] == request.args["id"]:
+		if c.attrs["Name"][1:] in containers:
 			return c.logs()
 
 @app.route('/api/stopContainer', methods=['GET'])
 def stopContainer():
+	containers = data["containers"][int(request.args["id"])]["containers"]
 	for c in client.containers.list():
-		if c.attrs["Image"][7:] == request.args["id"]:
+		if c.attrs["Name"][1:] in containers:
 			c.stop()
-			return 'true'
-	return 'false'
+	return 'true'
 
 @app.route('/api/startContainer', methods=['GET'])
 def startContainer():
-	for c in data["containers"]:
-		if c["imageName"] == request.args["imageName"]:
-			if c["startMode"] == "compose":
-				os.system("cd "+data["system"]["imagesBaseDir"]+c["modeConfig"]+" && docker-compose up -d")
-				return 'true'
-			elif c["startMode"] == "command":
-				os.system(c["modeConfig"])
-				return 'true'
+	c = data["containers"][int(request.args["id"])]
+	if c["startMode"] == "compose":
+		os.system("cd "+data["system"]["imagesBaseDir"]+c["modeConfig"]+" && docker-compose up -d")
+		return 'true'
+	elif c["startMode"] == "command":
+		os.system(c["modeConfig"])
+		return 'true'
 	return 'false'
 
 @app.route('/api/getStatistics', methods=['GET'])
 def getStatistics():
 	gpu = getGPUs()[0]
 	net = psutil.net_io_counters(pernic=True)[data["system"]["interface"]]
-	print(net)
 	stats = {
 		"gpu": {
 			"name": gpu.name,
