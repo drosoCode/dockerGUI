@@ -61,7 +61,10 @@ function updateStats()
     });
     document.querySelector("#stat_cpu").textContent = cpu;
     document.querySelector("#stat_ram").textContent = data["ram"]+"%";
-    document.querySelector("#stat_gpu").textContent = "LOAD: "+data["gpu"]["load"]+"% | MEM: "+data["gpu"]["memory"]+"% | TEMP: "+data["gpu"]["temperature"]+"°C";
+    if("gpu" in data)
+        document.querySelector("#stat_gpu").textContent = "LOAD: "+data["gpu"]["load"]+"% | MEM: "+data["gpu"]["memory"]+"% | TEMP: "+data["gpu"]["temperature"]+"°C";
+    else
+        document.querySelector("#gpu").hidden = true;
     document.querySelector("#stat_net").textContent = "IN: "+data["network"]["in"]+" GB | OUT: "+data["network"]["out"]+" GB";
 }
 
