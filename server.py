@@ -1,3 +1,5 @@
+#!/usr/local/bin/python3
+
 import os
 import flask
 from flask import request, jsonify, abort, render_template
@@ -7,11 +9,12 @@ from GPUtil import getGPUs
 import psutil
 import json
 
-#pip3 install gputil psutil docker flask
-
 client = docker.from_env()
-with open('config.json') as f:
+with open(os.getenv("DGUI_CONF") or 'config.json') as f:
     data = json.load(f)
+
+if data['system']['enableGPU']:
+	from GPUtil import getGPUs
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False
@@ -25,8 +28,9 @@ def getContainers():
 	running = {}
 	for c in client.containers.list():
 		ports = []
-		for p in c.attrs["HostConfig"]["PortBindings"].keys():
-			ports.append(c.attrs["HostConfig"]["PortBindings"][p][0]["HostPort"])
+		if "PortBindings" in c.attrs["HostConfig"] and c.attrs["HostConfig"]["PortBindings"] is not None:
+			for p in c.attrs["HostConfig"]["PortBindings"].keys():
+				ports.append(c.attrs["HostConfig"]["PortBindings"][p][0]["HostPort"])
 		if ports == "":
 			ports = None
 		running[c.attrs["Name"][1:]] = {
@@ -34,7 +38,7 @@ def getContainers():
 			"startDate": c.attrs["State"]["StartedAt"][0:c.attrs["State"]["StartedAt"].find(".")],
 			"ports": ports
 		}
-		
+
 	ret = []
 	for package in data["containers"]:
 		package["containers_running"] = 0
@@ -99,15 +103,8 @@ def startContainer():
 
 @app.route('/api/getStatistics', methods=['GET'])
 def getStatistics():
-	gpu = getGPUs()[0]
 	net = psutil.net_io_counters(pernic=True)[data["system"]["interface"]]
 	stats = {
-		"gpu": {
-			"name": gpu.name,
-			"temperature": gpu.temperature,
-			"load": round(gpu.load*100, 1),
-			"memory": round(gpu.memoryUtil*100, 1)
-		},
 		"cpu": psutil.cpu_percent(interval=1, percpu=True),
 		"ram": psutil.virtual_memory()[2],
 		"network": {
@@ -115,6 +112,14 @@ def getStatistics():
 			"out": round(net[0]/1000000000)
 		}
 	}
+	if data['system']['enableGPU']:
+		gpu = getGPUs()[0]
+		stats['gpu'] = {
+			"name": gpu.name,
+			"temperature": gpu.temperature,
+			"load": round(gpu.load*100, 1),
+			"memory": round(gpu.memoryUtil*100, 1)
+		}
 	return jsonify(stats)
 
 app.run(host='0.0.0.0', port=8080)
