@@ -1,0 +1,12 @@
+version: '3'
+services:
+  dockergui:
+    build: .
+    volumes:
+        - /app/docker/run/:/app/docker/run/
+        - /var/run/docker.sock:/var/run/docker.sock
+        - /home/dockergui/config.json:/app/docker/data/dockerGUI/config.json
+        - /home/dockergui/static/icons:/app/docker/data/dockerGUI/icons
+    environment:
+        - TZ=Europe/Paris
+    network_mode: host

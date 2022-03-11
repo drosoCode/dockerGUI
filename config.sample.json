@@ -1,0 +1,26 @@
+{
+    "system":
+    {
+        "interface": "enp2s0f0",
+        "imagesBaseDir": "/app/docker/run/",
+        "enableGPU": true
+    },
+    "containers":
+    [
+        {
+            "name": "Maria DB",
+            "icon": "mariadb.png",
+            "containers": ["mariadb"],
+            "startMode": "command",
+            "modeConfig": "sh /app/docker/run/MariaDB/start.sh"
+        },
+        {
+            "name": "Graylog",
+            "icon": "graylog.png",
+            "containers": ["graylog_graylog_1", "graylog_mongo_1", "graylog_elasticsearch_1","graylog_logspout_1"],
+            "startMode": "compose",
+            "modeConfig": "Graylog"
+        }
+    ]
+}
+
